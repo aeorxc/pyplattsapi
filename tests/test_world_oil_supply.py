@@ -1,10 +1,17 @@
-import pytest
 import pandas as pd
+import pytest
+
 from pyplattsapi import world_oil_supply
 
 
-def test_monthly_production():
-    res = world_oil_supply.production(filter="countryname=Saudi Arabia")
+@pytest.mark.parametrize(
+    "filter, field, groupBy",
+    [
+        ("countryname=Saudi Arabia", "sum(value)", None)
+    ],
+)
+def test_monthly_production(filter: str, field: str, groupBy: str):
+    res = world_oil_supply.production(filter=filter, field=field, groupBy=groupBy)
     assert isinstance(res, pd.DataFrame)
 
 # def test_get_crude_supply_by_country():
