@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="plattsapi",
+    name="pyplattsapi",
     version="0.0.1",
     author="aeorxc",
     description="Wrapper around Platts API",
@@ -15,7 +15,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=["pandas", "requests"],
+    install_requires=["pandas", "requests", "cachetools"],
     python_requires=">=3.8",
     setup_requires=["pytest-runner"],
     tests_require=["pytest"],
