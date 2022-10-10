@@ -15,7 +15,7 @@ from pyplattsapi import world_oil_supply
     ],
 )
 def test_monthly_production(filter: dict, field: str, groupBy: str):
-    res = world_oil_supply.production(filter=filter, field=field, groupBy=groupBy)
+    res = world_oil_supply.productionAPICall(filter=filter, field=field, groupBy=groupBy)
     assert isinstance(res, pd.DataFrame)
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ def test_monthly_production(filter: dict, field: str, groupBy: str):
     ],
 )
 def test_1(filter: dict, field: str, groupBy: str):
-    res = world_oil_supply.getMonthlyCrudeProductionByCountry(filter=filter, field=field, groupBy=groupBy)
+    res = world_oil_supply.getproduction(filter=filter, field=field, groupBy=groupBy)
     assert isinstance(res, pd.DataFrame)
     assert len(res) == 12
     assert 'sum_value' in res.columns
