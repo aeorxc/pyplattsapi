@@ -5,9 +5,9 @@ setuptools.setup(
     version="0.0.1",
     author="aeorxc",
     description="Wrapper around Platts API",
-    url="https://github.com/aeorxc/plattsapi",
+    url="https://github.com/aeorxc/pyplattsapi",
     project_urls={
-        "Source": "https://github.com/aeorxc/plattsapi",
+        "Source": "https://github.com/aeorxc/pyplattsapi",
     },
     packages=setuptools.find_packages(),
     classifiers=[
