@@ -7,8 +7,15 @@ from pyplattsapi import world_oil_supply
 @pytest.mark.parametrize(
     "filter, field, groupBy",
     [
-        ('countryname:"Italy" and supplyTypeName:"Crude" and productionTypeName:"Production"', None, None)
-        ('countryname:"Saudi Arabia" and supplyTypeName:"Crude" and productionTypeName:"Production"', 'sum(value)', 'countryName, year, month')
+        (
+            'countryname:"Italy" and supplyTypeName:"Crude" and productionTypeName:"Production"',
+            None,
+            None,
+        )(
+            'countryname:"Saudi Arabia" and supplyTypeName:"Crude" and productionTypeName:"Production"',
+            "sum(value)",
+            "countryName, year, month",
+        )
     ],
 )
 def test_get_production(filter: dict, field: str, groupBy: str):

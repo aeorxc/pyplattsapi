@@ -3,13 +3,14 @@ from pyplattsapi import plattsapicore
 
 
 def test_get_access_token():
-    res = plattsapicore.get_access_token(api_dataset='WORLD OIL SUPPLY')
+    res = plattsapicore.get_access_token(api_dataset="WORLD OIL SUPPLY")
     assert res is not None
 
 
 def test_build_header():
-    res = plattsapicore.build_header(api_dataset='WORLD OIL SUPPLY')
-    assert 'Authorization' in res
+    res = plattsapicore.build_header(api_dataset="WORLD OIL SUPPLY")
+    assert "Authorization" in res
+
 
 #
 #
