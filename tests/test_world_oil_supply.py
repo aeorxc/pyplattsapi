@@ -11,7 +11,8 @@ from pyplattsapi import world_oil_supply
             'countryname:"Italy" and supplyTypeName:"Crude" and productionTypeName:"Production"',
             None,
             None,
-        )(
+        ),
+        (
             'countryname:"Saudi Arabia" and supplyTypeName:"Crude" and productionTypeName:"Production"',
             "sum(value)",
             "countryName, year, month",
