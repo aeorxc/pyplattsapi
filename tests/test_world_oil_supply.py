@@ -19,6 +19,6 @@ from pyplattsapi import world_oil_supply
         )
     ],
 )
-def test_get_production(filter: dict, field: str, groupBy: str):
+def test_get_production(filter: str, field: str, groupBy: str):
     res = world_oil_supply.get_production(filter=filter, field=field, groupBy=groupBy)
     assert isinstance(res, pd.DataFrame)

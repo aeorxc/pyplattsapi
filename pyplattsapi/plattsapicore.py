@@ -1,8 +1,11 @@
 import os
+import time
 from functools import lru_cache
-from cachetools.func import ttl_cache
+from urllib.error import HTTPError
 
+import pandas as pd
 import requests
+from cachetools.func import ttl_cache
 
 api_url = "https://api.platts.com"
 auth_url = f"{api_url}/auth/api"
@@ -43,3 +46,30 @@ def build_header(api_dataset):
         "Authorization": f"Bearer {get_access_token(api_dataset)}",
     }
     return header
+
+
+def generic_api_call_helper(api: str, api_name: str, params: dict, page: int = 1):
+    params['page'] = page
+    response = requests.get(
+        url=api, headers=build_header(api_name), params=params
+    )
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise HTTPError(url=api, code=response.status_code, msg=response.json()['cause'], hdrs=None, fp=None)
+
+
+def generic_api_call(api: str, api_name: str, params: dict):
+    # make call for page 1
+    r = generic_api_call_helper(api, api_name, params)
+    max_page = int(r["metadata"]["count"] / 1000)
+    res = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
+    # make call for pages 2 -> n (if needed as determined by max_page)
+    for page in range(2, max_page + 2):
+        time.sleep(0.55) # 2 calls per second allowed
+        r = generic_api_call_helper(api, api_name, params, page=page)
+        d = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
+        res = pd.concat([d, res], axis=1)
+
+    res = res.T
+    return res
