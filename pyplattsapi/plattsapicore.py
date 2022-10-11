@@ -48,8 +48,9 @@ def build_header(api_dataset):
     return header
 
 
-def generic_api_call_helper(api: str, api_name: str, params: dict, page: int = 1):
-    params['page'] = page
+def generic_api_call_helper(api: str, api_name: str, params: dict, page: int = None):
+    if page is not None:
+        params['page'] = page
     response = requests.get(
         url=api, headers=build_header(api_name), params=params
     )
@@ -61,7 +62,7 @@ def generic_api_call_helper(api: str, api_name: str, params: dict, page: int = 1
 
 def generic_api_call(api: str, api_name: str, params: dict):
     # make call for page 1
-    r = generic_api_call_helper(api, api_name, params)
+    r = generic_api_call_helper(api, api_name, params, page=1)
     max_page = int(r["metadata"]["count"] / 1000)
     res = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
     # make call for pages 2 -> n (if needed as determined by max_page)
@@ -70,6 +71,20 @@ def generic_api_call(api: str, api_name: str, params: dict):
         r = generic_api_call_helper(api, api_name, params, page=page)
         d = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
         res = pd.concat([d, res], axis=1)
+
+    res = res.T
+    return res
+
+def generic_odata_call(api: str, api_name: str, params: dict):
+    # make call for page 1
+    r = generic_api_call_helper(api, api_name, params)
+    res = pd.concat([pd.Series(x) for x in r["value"]], axis=1)
+    nextPage = r['@odata.nextLink'] if '@odata.nextLink' in r else None
+    while nextPage:
+        r = generic_api_call_helper(r['@odata.nextLink'], api_name=api_name, params=None)
+        d = pd.concat([pd.Series(x) for x in r["value"]], axis=1)
+        res = pd.concat([d, res], axis=1)
+        nextPage = r['@odata.nextLink'] if '@odata.nextLink' in r else None
 
     res = res.T
     return res
