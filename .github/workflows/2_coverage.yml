@@ -8,11 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  EIA_KEY: ${{secrets.EIA_KEY}}
-  EA_API_KEY: ${{secrets.EA_API_KEY}}
-  LIMSERVER: ${{secrets.LIMSERVER}}
-  LIMUSERNAME: ${{secrets.LIMUSERNAME}}
-  LIMPASSWORD: ${{secrets.LIMPASSWORD}}
+  PLATTS_API_CREDENTIALS: ${{secrets.PLATTS_API_CREDENTIALS}}
 
 jobs:
   run:
