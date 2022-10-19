@@ -1,6 +1,7 @@
 import pandas as pd
 
 from pyplattsapi import plattsapicore
+from qe import qe
 
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
@@ -20,9 +21,18 @@ def get_runs(filter:str, field:str=None, groupBy:str=None):
     res.index.name = "date"
     return res
 
+def get_price_forecast(symbol: str):
+    forecasts_api = f"{plattsapicore.api_url}/energy-price-forecast/v1/prices-short-term"
+    filter = "priceSymbol: " + f'"{symbol}"'
+    params = {
+        "filter": filter,
+        "pageSize": 1000,
+    }
+    res = plattsapicore.generic_api_call(api=forecasts_api, api_name=api_name, params=params)
+    return res
 
 
-#
+
 # def getMarginsbyType(type: str):
 #     Historical_data_URL = f"https://api.platts.com/odata/refinery-data/v2/Margins?&pageSize=1000&$expand=*"
 #     df5 = pd.DataFrame()
