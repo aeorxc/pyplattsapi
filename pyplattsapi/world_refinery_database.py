@@ -1,7 +1,7 @@
 import pandas as pd
 
 from pyplattsapi import plattsapicore
-from qe import qe
+
 
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
