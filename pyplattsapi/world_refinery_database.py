@@ -3,6 +3,7 @@ from pyplattsapi import plattsapicore
 from commodplot import commodplot as cpl
 from commodplot import jinjautils as ju
 from datetime import datetime
+from qe import qe
 
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
@@ -36,6 +37,7 @@ def get_outages(filter):
     res = pd.concat([res, df], axis=1)
     res['startDate'] = pd.to_datetime(res['startDate'], format='%Y-%m-%d')
     res['endDate'] = pd.to_datetime(res['endDate'], format='%Y-%m-%d')
+    #qe.qe(res)
     return res
 
 
@@ -81,7 +83,16 @@ def get_jinja_dict():
             "us coker": create_graph('countryName:"United States" AND processUnitName:"Coker"',"USA", "Coker"),
             "china cdu": create_graph('countryName:"China" AND processUnitName:"CDU"',"China", "CDU"),
             "china fcu": create_graph('countryName:"China" AND processUnitName:"FCU"',"China", "FCU"),
-            "china coker": create_graph('countryName:"China" AND processUnitName:"Coker"',"China","Coker")}
+            "china coker": create_graph('countryName:"China" AND processUnitName:"Coker"',"China","Coker"),
+            "russia cdu": create_graph('countryName:"Russia" AND processUnitName:"CDU"',"Russia","CDU"),
+            "russia fcu": create_graph('countryName:"Russia" AND processUnitName:"FCU"',"Russia","FCU"),
+            "russia coker": create_graph('countryName:"Russia" AND processUnitName:"Coker"',"Russia","Coker"),
+            "india cdu": create_graph('countryName:"India" AND processUnitName:"CDU"',"India","CDU"),
+            "india fcu": create_graph('countryName:"India" AND processUnitName:"FCU"',"India","FCU"),
+            "india coker": create_graph('countryName:"India" AND processUnitName:"Coker"',"India","Coker"),
+            "japan cdu": create_graph('countryName:"Japan" AND processUnitName:"CDU"',"Japan","CDU"),
+            "japan fcu": create_graph('countryName:"Japan" AND processUnitName:"FCU"',"Japan","FCU"),
+            "japan coker": create_graph('countryName:"Japan" AND processUnitName:"Coker"',"Japan","Coker"),}
     return data
 
 
