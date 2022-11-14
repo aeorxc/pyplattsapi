@@ -1,13 +1,15 @@
 import pandas as pd
-
 from pyplattsapi import plattsapicore
-
+from commodplot import commodplot as cpl
+from commodplot import jinjautils as ju
+from datetime import datetime
 
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
+outages_api = f"{plattsapicore.api_url}/refinery-data/v1/outage-alerts"
 
 
-def get_runs(filter:str, field:str=None, groupBy:str=None):
+def get_runs(filter: str, field: str = None, groupBy: str = None):
     params = {
         "$filter": filter,
         "pageSize": 1000,
@@ -16,22 +18,81 @@ def get_runs(filter:str, field:str=None, groupBy:str=None):
     }
     res = plattsapicore.generic_odata_call(api=runs_api, api_name=api_name, params=params)
 
-    qmap = { 1: 1, 2: 4, 3: 7, 4: 10 }
+    qmap = {1: 1, 2: 4, 3: 7, 4: 10}
     res.index = res.apply(lambda x: pd.to_datetime(f"{x.Year}-{qmap.get(x.Quarter)}-1"), 1)
     res.index.name = "date"
     return res
 
-def get_price_forecast(symbol: str):
-    forecasts_api = f"{plattsapicore.api_url}/energy-price-forecast/v1/prices-short-term"
-    filter = "priceSymbol: " + f'"{symbol}"'
+
+def get_outages(filter):
     params = {
-        "filter": filter,
         "pageSize": 1000,
+        "filter": filter,
+        "page": 1,
     }
-    res = plattsapicore.generic_api_call(api=forecasts_api, api_name=api_name, params=params)
+    res = plattsapicore.no_token_api_call(api=outages_api, api_name=api_name, params=params)
+    df = res['alerts'].apply(lambda col: col[0]).apply(pd.Series)
+    res.drop(['alerts'], inplace=True, axis=1)
+    res = pd.concat([res, df], axis=1)
+    res['startDate'] = pd.to_datetime(res['startDate'], format='%Y-%m-%d')
+    res['endDate'] = pd.to_datetime(res['endDate'], format='%Y-%m-%d')
     return res
 
 
+def create_timeseries(res):
+    df1 = pd.DataFrame()
+    for index, row in res.iterrows():
+        row = tar_to_timeseries(row['outageVol_MBD'], row['startDate'], row['endDate'])
+        df1 = pd.concat([df1, row], axis=1)
+    df1 = (df1.sum(axis=1))
+    df1 = df1.rename('capacityOffline')
+    df1 = df1.to_frame()
+    return df1
+
+
+def tar_to_timeseries(taramount, startdate, enddate, tarname=None):
+    dr = pd.date_range("01/01/2000", "12/01/2030")
+    ser = pd.Series(0, index=dr)
+    ser[startdate:enddate] = taramount
+    ser.name = tarname
+    return ser
+
+
+def display(df, country, unitType):
+    fig = cpl.seas_line_plot(df, visible_line_years=1, yaxis_title="Mbbls",
+                             inc_change_sum=False, title=f"{country} {unitType}")
+    return fig
+
+
+def create_graph(filter, country, unitType):
+    df = get_outages(filter)
+    df = create_timeseries(df)
+    df = df[~(df.index < datetime.strptime("01/01/2017 00:00:00", '%m/%d/%Y %H:%M:%S'))]
+    year = datetime.today().year + 1
+    df = df[~(df.index > datetime.strptime(f"12/31/{year} 00:00:00", '%m/%d/%Y %H:%M:%S'))]
+    fig = display(df, country, unitType)
+    return fig
+
+
+def get_jinja_dict():
+    data = {"name": "Platts Offline Capacity", "title": "Platts Offline Capacity",
+            "us cdu": create_graph('countryName:"United States" AND processUnitName:"CDU"',"USA", "CDU"),
+            "us fcu": create_graph('countryName:"United States" AND processUnitName:"FCU"',"USA", "FCU"),
+            "us coker": create_graph('countryName:"United States" AND processUnitName:"Coker"',"USA", "Coker"),
+            "china cdu": create_graph('countryName:"China" AND processUnitName:"CDU"',"China", "CDU"),
+            "china fcu": create_graph('countryName:"China" AND processUnitName:"FCU"',"China", "FCU"),
+            "china coker": create_graph('countryName:"China" AND processUnitName:"Coker"',"China","Coker")}
+    return data
+
+
+def do_jinga():
+    data = get_jinja_dict()
+    return ju.render_html(data, template='graphs.html', filename="test.html",
+                          package_loader_name='world_refinery_database')
+
+
+if __name__ == "__main__":
+    do_jinga()
 
 # def getMarginsbyType(type: str):
 #     Historical_data_URL = f"https://api.platts.com/odata/refinery-data/v2/Margins?&pageSize=1000&$expand=*"
