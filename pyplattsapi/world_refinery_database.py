@@ -8,6 +8,7 @@ from qe import qe
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
 outages_api = f"{plattsapicore.api_url}/refinery-data/v1/outage-alerts"
+capacity_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Capacity"
 
 
 def get_runs(filter: str, field: str = None, groupBy: str = None):
@@ -37,7 +38,6 @@ def get_outages(filter):
     res = pd.concat([res, df], axis=1)
     res['startDate'] = pd.to_datetime(res['startDate'], format='%Y-%m-%d')
     res['endDate'] = pd.to_datetime(res['endDate'], format='%Y-%m-%d')
-    #qe.qe(res)
     return res
 
 
@@ -101,9 +101,21 @@ def do_jinga():
     return ju.render_html(data, template='graphs.html', filename="test.html",
                           package_loader_name='world_refinery_database')
 
+def get_capacity(filter):
+    apply = f"filter({filter})/aggregate(Mbcd with sum as SumMbcd)"
+
+    params = {
+        "pageSize": 1000,
+        "page": 1,
+        "$apply": apply
+    }
+    res = plattsapicore.generic_odata_call(api=capacity_api, api_name=api_name, params=params)
+    res = res.loc[0]['SumMbcd']
+    return res
+
 
 if __name__ == "__main__":
-    do_jinga()
+    get_capacity("Refinery/Country/Name eq 'United States' and Year le 2022 and ProcessUnitId eq 1 and CapacityStatusId in (1,2,4)")
 
 # def getMarginsbyType(type: str):
 #     Historical_data_URL = f"https://api.platts.com/odata/refinery-data/v2/Margins?&pageSize=1000&$expand=*"
