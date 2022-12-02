@@ -124,9 +124,6 @@ def get_capacity(filter):
     res = res.loc[0]['SumMbcd']
     return res
 
-
-if __name__ == "__main__":
-    print(get_capacity("Refinery/Country/Name eq 'United States' and Year le 2023 and ProcessUnitId eq 1 and CapacityStatusId in (1,2,4)"))
     #qe.qe(get_runs("Refinery/Country/Name eq 'United States' and Year le 2022"))
 # def getMarginsbyType(type: str):
 #     Historical_data_URL = f"https://api.platts.com/odata/refinery-data/v2/Margins?&pageSize=1000&$expand=*"
