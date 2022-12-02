@@ -8,7 +8,7 @@ from qe import qe
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
 outages_api = f"{plattsapicore.api_url}/refinery-data/v1/outage-alerts"
-capacity_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Capacity"
+capacity_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Refineries"
 
 
 def get_runs(filter: str, field: str = None, groupBy: str = None):
@@ -23,6 +23,16 @@ def get_runs(filter: str, field: str = None, groupBy: str = None):
     qmap = {1: 1, 2: 4, 3: 7, 4: 10}
     res.index = res.apply(lambda x: pd.to_datetime(f"{x.Year}-{qmap.get(x.Quarter)}-1"), 1)
     res.index.name = "date"
+    return res
+
+def get_refineries(filter: str, groupBy: str = None):
+    params = {
+        "$filter": filter,
+        "pageSize": 1000,
+        "groupBy": groupBy,
+
+    }
+    res = plattsapicore.generic_odata_call(api=capacity_api, api_name=api_name, params=params)
     return res
 
 
@@ -115,8 +125,8 @@ def get_capacity(filter):
 
 
 if __name__ == "__main__":
-    get_capacity("Refinery/Country/Name eq 'United States' and Year le 2022 and ProcessUnitId eq 1 and CapacityStatusId in (1,2,4)")
-
+    print(get_capacity("Refinery/Country/Name eq 'United States' and Year le 2023 and ProcessUnitId eq 1 and CapacityStatusId in (1,2,4)"))
+    #qe.qe(get_runs("Refinery/Country/Name eq 'United States' and Year le 2022"))
 # def getMarginsbyType(type: str):
 #     Historical_data_URL = f"https://api.platts.com/odata/refinery-data/v2/Margins?&pageSize=1000&$expand=*"
 #     df5 = pd.DataFrame()
