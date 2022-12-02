@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="pyplattsapi",
-    version="0.0.7",
+    version="0.0.8",
     author="aeorxc",
     description="Wrapper around Platts API",
     url="https://github.com/aeorxc/pyplattsapi",

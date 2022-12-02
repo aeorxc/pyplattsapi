@@ -8,7 +8,8 @@ from qe import qe
 api_name = "WORLD REFINERY DATABASE"
 runs_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Runs"
 outages_api = f"{plattsapicore.api_url}/refinery-data/v1/outage-alerts"
-capacity_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Refineries"
+capacity_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Capacity"
+refinery_api = f"{plattsapicore.api_url}/odata/refinery-data/v2/Refineries"
 
 
 def get_runs(filter: str, field: str = None, groupBy: str = None):
@@ -32,7 +33,7 @@ def get_refineries(filter: str, groupBy: str = None):
         "groupBy": groupBy,
 
     }
-    res = plattsapicore.generic_odata_call(api=capacity_api, api_name=api_name, params=params)
+    res = plattsapicore.generic_odata_call(api=refinery_api, api_name=api_name, params=params)
     return res
 
 
