@@ -3,7 +3,9 @@ from pyplattsapi import plattsapicore
 
 
 def test_get_access_token():
-    res = plattsapicore.get_access_token(api_dataset="REFINING MARGINS AND CRUDE ARBITRAGE")
+    api_dataset = "WORLD OIL SUPPLY"
+    res = plattsapicore.get_access_token(api_dataset=api_dataset)
+    print(res)
     assert res is not None
 
 

@@ -50,14 +50,18 @@ def build_header(api_dataset):
 
 def generic_api_call_helper(api: str, api_name: str, params: dict, page: int = None):
     if page is not None:
-        params['page'] = page
-    response = requests.get(
-        url=api, headers=build_header(api_name), params=params
-    )
+        params["page"] = page
+    response = requests.get(url=api, headers=build_header(api_name), params=params)
     if response.status_code == 200:
         return response.json()
     else:
-        raise HTTPError(url=api, code=response.status_code, msg=response.json()['cause'], hdrs=None, fp=None)
+        raise HTTPError(
+            url=api,
+            code=response.status_code,
+            msg=response.json()["cause"],
+            hdrs=None,
+            fp=None,
+        )
 
 
 def generic_api_call(api: str, api_name: str, params: dict):
@@ -67,7 +71,7 @@ def generic_api_call(api: str, api_name: str, params: dict):
     res = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
     # make call for pages 2 -> n (if needed as determined by max_page)
     for page in range(2, max_page + 2):
-        time.sleep(0.55) # 2 calls per second allowed
+        time.sleep(0.55)  # 2 calls per second allowed
         r = generic_api_call_helper(api, api_name, params, page=page)
         d = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
         res = pd.concat([d, res], axis=1)
@@ -75,19 +79,23 @@ def generic_api_call(api: str, api_name: str, params: dict):
     res = res.T
     return res
 
+
 def generic_odata_call(api: str, api_name: str, params: dict):
     # make call for page 1
     r = generic_api_call_helper(api, api_name, params)
     res = pd.concat([pd.Series(x) for x in r["value"]], axis=1)
-    nextPage = r['@odata.nextLink'] if '@odata.nextLink' in r else None
+    nextPage = r["@odata.nextLink"] if "@odata.nextLink" in r else None
     while nextPage:
-        r = generic_api_call_helper(r['@odata.nextLink'], api_name=api_name, params=None)
+        r = generic_api_call_helper(
+            r["@odata.nextLink"], api_name=api_name, params=None
+        )
         d = pd.concat([pd.Series(x) for x in r["value"]], axis=1)
         res = pd.concat([d, res], axis=1)
-        nextPage = r['@odata.nextLink'] if '@odata.nextLink' in r else None
+        nextPage = r["@odata.nextLink"] if "@odata.nextLink" in r else None
 
     res = res.T
     return res
+
 
 def no_token_api_call(api: str, api_name: str, params: dict):
     # make call for page 1
@@ -96,7 +104,7 @@ def no_token_api_call(api: str, api_name: str, params: dict):
     res = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
     # make call for pages 2 -> n (if needed as determined by max_page)
     for page in range(2, max_page + 2):
-        time.sleep(0.55) # 2 calls per second allowed
+        time.sleep(0.55)  # 2 calls per second allowed
         r = no_token_api_call_helper(api, api_name, params, page=page)
         d = pd.concat([pd.Series(x) for x in r["results"]], axis=1)
         res = pd.concat([d, res], axis=1)
@@ -104,16 +112,26 @@ def no_token_api_call(api: str, api_name: str, params: dict):
     res = res.T
     return res
 
+
 def no_token_api_call_helper(api: str, api_name: str, params: dict, page: int = None):
     if page is not None:
-        params['page'] = page
+        params["page"] = page
     response = requests.get(
         url=api, headers=no_token_build_header(api_name), params=params
     )
     if response.status_code == 200:
         return response.json()
     else:
-        raise HTTPError(url=api, code=response.status_code, msg=response.json()['cause'], hdrs=None, fp=None)
+        msg = response.json()
+        if "cause" in msg:
+            msg = msg["cause"]
+        elif "message" in msg:
+            msg = msg["message"]
+        else:
+            str(response.json())
+
+        raise HTTPError(url=api, code=response.status_code, msg=msg, hdrs=None, fp=None)
+
 
 @ttl_cache(ttl=10 * 60)
 def no_token_build_header(api_dataset):

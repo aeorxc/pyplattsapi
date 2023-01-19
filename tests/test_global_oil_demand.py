@@ -16,7 +16,7 @@ from pyplattsapi import global_oil_demand
             'countryname:"Saudi Arabia" and productName:"Naphtha"',
             "sum(value)",
             "countryName, year, month",
-        )
+        ),
     ],
 )
 def test_get_demand(filter: str, field: str, groupBy: str):
@@ -33,9 +33,10 @@ def test_get_demand(filter: str, field: str, groupBy: str):
             None,
             None,
         ),
-
     ],
 )
-def test_get_metadata(metadata_endpoint:str, filter: str, field: str, groupBy: str):
-    res = global_oil_demand.get_metadata(metadata_endpoint=metadata_endpoint, filter=filter, field=field, groupBy=groupBy)
+def test_get_metadata(metadata_endpoint: str, filter: str, field: str, groupBy: str):
+    res = global_oil_demand.get_metadata(
+        metadata_endpoint=metadata_endpoint, filter=filter, field=field, groupBy=groupBy
+    )
     assert isinstance(res, pd.DataFrame)
